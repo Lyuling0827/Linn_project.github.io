@@ -1,0 +1,520 @@
+/* 地图容器全屏 */
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+/* 自定义搜索框容器，位于左上 */
+#custom-geocoder {
+  position: absolute;
+  top: 10px;  
+  left: 10px;
+  z-index: 2;
+}
+
+/* 顶部控制容器：Difficulty 筛选 */
+#top-controls {
+  position: absolute;
+  top: 90px; /* 调整此值，确保与搜索框不重叠 */
+  left: 10px;
+  z-index: 1;
+  background: rgba(255,255,255,0.9);
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+#top-controls fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+#top-controls legend {
+  margin-right: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #004d1a; /* 与按钮风格相呼应 */
+  text-shadow: 2px 2px #00cc44;
+}
+
+/* 让每个 label 看起来像一个卡通按钮 */
+#top-controls label {
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  background-color: #00cc7a;  /* 亮绿色 */
+  border: 2px solid #00802b;  /* 深绿色边框 */
+  border-radius: 6px;
+  padding: 2px 5.5px;
+  margin-right: 4px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 2px 2px #80ffaa;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+#top-controls label:hover {
+  transform: scale(1.05);
+  background-color: #b3ffb3;
+}
+#top-controls input[type="radio"]:checked + label {
+  background-color: #00cc44;
+}
+
+/* 顶部控制容器：Length Category 筛选 */
+#length-controls {
+  position: absolute;
+  top: 130px;  /* 略低于 Difficulty 筛选 */
+  left: 10px;
+  z-index: 1;
+  background: rgba(255,255,255,0.9);
+  padding: 6px 12px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+#length-controls fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-family: 'Comic Sans MS', cursive;
+}
+#length-controls legend {
+  margin-right: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #004d1a;
+  text-shadow: 2px 2px #00cc44;
+}
+#length-controls label {
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  background-color: #00cc7a;
+  border: 2px solid #00802b;
+  border-radius: 6px;
+  padding: 2px 6.5px;
+  margin-right: 4px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 2px 2px #80ffaa;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+#length-controls label:hover {
+  transform: scale(1.05);
+  background-color: #b3ffb3;
+}
+#length-controls input[type="radio"]:checked + label {
+  background-color: #00cc44;
+}
+
+/* 弹窗内容样式 */
+.mapboxgl-popup-content h3 {
+  color: #006400;
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  margin: 0 0 8px 0;
+}
+.mapboxgl-popup-content p strong {
+  color: #1a0000;
+}
+.mapboxgl-popup-content p {
+  margin: 4px 0;
+}
+
+/* Sidebar 样式 */
+#sidebar {
+  display: none;              /* 默认隐藏 */
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 25%;
+  height: 100vh;
+  background: rgba(255,255,255,0.95);
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+/* 卡通风格标题 */
+.cartoon-title {
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 24px;
+  color: #196619;
+  margin: 0 0 6px 0;
+  text-shadow: 2px 2px #00ff99;
+}
+
+/* 卡通风格标签文字 */
+.cartoon-label {
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+}
+
+/* 卡通风格按钮 */
+.cartoon-button {
+  background-color: #006622;
+  border: 2px solid #00b33c;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 2px 2px #003311;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.cartoon-button:hover {
+  transform: scale(1.05);
+  background-color: #1affa3;
+}
+
+/* 卡通风格 iframe */
+.cartoon-iframe {
+  width: 100%;
+  height: 300px;
+  border: none;
+  margin-top: 10px;
+}
+
+/* Ascent 控制样式 */
+#ascent-controls {
+  position: absolute;
+  top: 200px; /* 比 Length Category 更低 */
+  left: 10px;
+  z-index: 1;
+  background: rgba(255,255,255,0.9);
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  font-family: 'Comic Sans MS', cursive;
+}
+#ascent-controls fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+#ascent-controls legend {
+  margin-right: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #004d1a;
+  text-shadow: 2px 2px #00cc44;
+}
+.ascent-range-container {
+  display: flex;
+  align-items: right;
+}
+.ascent-text {
+  margin: 0 8px 0 0;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  color: #333;
+}
+#ascent-range {
+  width: 145px;
+}
+#ascent-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 18px;
+  background: #00cc7a;
+  border: 2px solid #00802b;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 1px 1px #80ffaa;
+}
+#ascent-range::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #b3ffb3;
+  border-radius: 3px;
+  border: 1px solid #00802b;
+}
+
+/* 新增：Time 控制样式，保持与 Ascent 控制相似 */
+#time-controls {
+  position: absolute;
+  top: 230px; /* 根据需要调整位置 */
+  left: 10px;
+  z-index: 1;
+  background: rgba(255,255,255,0.9);
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  font-family: 'Comic Sans MS', cursive;
+}
+#time-controls fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+#time-controls legend {
+  margin-right: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #004d1a;
+  text-shadow: 2px 2px #00cc44;
+}
+.time-range-container {
+  display: flex;
+  align-items: center;
+}
+.time-text {
+  margin: 0 8px 0 0;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  color: #333;
+}
+#time-range {
+  width: 200px;
+}
+#time-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 18px;
+  background: #00cc7a;
+  border: 2px solid #00802b;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 1px 1px #80ffaa;
+}
+#time-range::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #b3ffb3;
+  border-radius: 3px;
+  border: 1px solid #00802b;
+}
+
+/* Classification 容器 */
+#classification-container {
+  position: absolute;
+  top: 10px; /* 可根据需要调整 */
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 两者之间间距 */
+  background: rgba(255,255,255,0.9);
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* 地图标题 */
+#map-title {
+  font-family: 'Comic Sans MS', cursive; /* 可根据整体风格选择字体 */
+  font-size: 22.5px;
+  color: #004d1a;
+  margin: 0;
+}
+
+/* Classification 下拉菜单样式 */
+.dropdown {
+  position: absolute;
+  top: 50px; /* 放到最上方 */
+  left: 10px;
+  z-index: 2;
+  display: inline-block;
+  background: rgba(255,255,255,0.9);
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  /* 移除 margin-top，使其处于顶部 */
+}
+.dropbtn {
+  background-color: #f2f2f2;
+  color: #333;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  min-width: 180px;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.dropdown-content label {
+  display: block;
+  margin: 4px 0;
+  cursor: pointer;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+}
+/* 鼠标悬停显示下拉 */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* 自定义比例尺外观 */
+.mapboxgl-ctrl-scale {
+  background-color: #00cc7a;      /* 亮绿色背景 */
+  border: 2px solid #00802b;      /* 深绿色边框 */
+  border-radius: 6px;             /* 圆角 */
+  color: #fff;                    /* 白色文字 */
+  padding: 2px 6px;               /* 内边距 */
+  font-family: 'Comic Sans MS', cursive; /* 卡通字体 */
+  font-size: 14px;                /* 字号 */
+  box-shadow: 2px 2px #80ffaa;    /* 阴影 */
+  transition: transform 0.2s ease;
+}
+
+/* 悬停时可稍微放大 */
+.mapboxgl-ctrl-scale:hover {
+  transform: scale(1.05);
+}
+
+/* 圆形问号Help按钮 */
+#help-button {
+  position: absolute;
+  top: 100px;  /* 根据实际需要调整 */
+  right: 10px;
+  z-index: 10;
+
+  /* 圆形外观 */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #00cc7a;  /* 亮绿色 */
+  border: 2px solid #00802b;  /* 深绿色边框 */
+  color: #fff;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 20px;
+  line-height: 36px;  /* 让问号居中 */
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 2px 2px #80ffaa;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+#help-button:hover {
+  transform: scale(1.05);
+  background-color: #b3ffb3;
+}
+
+/* 帮助弹窗：卡通对话框 */
+#help-popup {
+  position: absolute;
+  top: 60px; /* 根据help-button位置微调 */
+  right: 10px;
+  z-index: 999;
+  display: none; /* 默认隐藏 */
+  
+  /* 卡通泡泡外观 */
+  width: 240px; /* 可调整 */
+  background: #b3ffb3; /* 浅绿色背景 */
+  border: 2px solid #00802b;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 2px 2px #80ffaa;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 小箭头：在弹窗顶部中间位置 */
+#help-popup::after {
+  content: "";
+  position: absolute;
+  top: -14px; /* 箭头高度 + 边框 */
+  right: 20px; /* 箭头与弹窗右侧距离，可调整 */
+  border-width: 8px;
+  border-style: solid;
+  border-color: transparent transparent #b3ffb3 transparent;
+}
+
+/* 帮助文本 */
+#help-text {
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Close按钮可复用你的cartoon-button风格 */
+#help-close {
+  margin-top: 8px;
+}
+
+/* 天气容器 (右下角) */
+#weather-container {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 999;  /* 确保在上层 */
+  width: 150px;  /* 根据需要 */
+  background: rgba(255,255,255,0.9);
+  border: 2px solid #00802b;
+  border-radius: 6px;
+  box-shadow: 2px 2px #80ffaa;
+  padding: 8px;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 可让文本稍微卡通一些 */
+#weather-info {
+  margin: 0;
+  text-align: center;
+}
+
+#theme-controls {
+  position: absolute;
+  top: 355px; /* 或 360px，确保在Ascent之后 */
+  left: 10px;
+  z-index: 1;
+  background: rgba(255,255,255,0.9);
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  font-family: 'Comic Sans MS', cursive;
+}
+
+#theme-controls fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;           /* 按钮横排 */
+  align-items: center;
+}
+
+#theme-controls legend {
+  margin-right: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #004d1a;
+  text-shadow: 2px 2px #00cc44;
+}
+
+/* 与 Difficulty 的 label 一样的卡通风格 */
+#theme-controls label {
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  background-color: #00cc7a;   /* 亮绿色 */
+  border: 2px solid #00802b;   /* 深绿色边框 */
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-right: 4px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 2px 2px #80ffaa;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* 悬停效果 */
+#theme-controls label:hover {
+  transform: scale(1.05);
+  background-color: #b3ffb3;
+}
+
+/* 当 radio 被选中时，背景更深 */
+#theme-controls input[type="radio"]:checked + label {
+  background-color: #00cc44;
+}

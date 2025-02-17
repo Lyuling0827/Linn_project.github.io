@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Web mapping project</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapbox Classification Filter</title>
+
+  <!-- Mapbox GL JS 核心CSS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css" rel="stylesheet" />
+  <!-- Mapbox GL Geocoder CSS -->
+  <link
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css"
+    rel="stylesheet"
+    type="text/css"
+  />
+
+  <style>
+    /* 让地图全屏 */
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 顶部筛选容器，示例绝对定位 */
+    #top-controls, #length-controls, #ascent-controls {
+      position: absolute;
+      top: 90px; /* 可自行调节 */
+      left: 10px;
+      z-index: 2;
+      background: rgba(255,255,255,0.9);
+      padding: 6px 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+    }
+    /* 让它们分开一点，可做不同定位 */
+    #length-controls {
+      top: 160px; /* 比 #top-controls 再往下 */
+    }
+    #ascent-controls {
+      top: 293px; /* 再往下 */
+    }
+
+    /* custom-geocoder 也可绝对定位 */
+    #custom-geocoder {
+      position: absolute;
+      top: 60px; /* 或其它 */
+      right: 10px;
+      z-index: 2;
+    }
+
+    /* sidebar 右侧固定 */
+    #sidebar {
+      display: none; /* 默认隐藏 */
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 25%;
+      height: 100%;
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
+      overflow-y: auto;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+    /* Classification下拉菜单容器 */
+    .dropdown {
+      position: absolute;
+      top: 45px; /* 再往下，避免与上面冲突 */
+      left: 1px;
+      z-index: 2;
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .dropbtn {
+      background-color: #f2f2f2;
+      color: #333;
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      min-width: 180px;
+      padding: 8px;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    /* 悬停时显示下拉 */
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    /* 下拉面板内的 label 样式 */
+    .dropdown-content label {
+      display: block;
+      margin: 4px 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 地图容器 -->
+  <div id="map"></div>
+
+  <!-- 若使用 Mapbox Geocoder 的话，可在右上或其它位置 -->
+  <div id="custom-geocoder"></div>
+
+  <!-- 顶部控制区：Difficulty 筛选（Radio） -->
+  <div id="top-controls">
+    <fieldset>
+      <legend>Difficulty</legend>
+      <label>
+        <input type="radio" name="diff" value="all" checked>
+        All
+      </label>
+      <label>
+        <input type="radio" name="diff" value="Easy">
+        Easy
+      </label>
+      <label>
+        <input type="radio" name="diff" value="Moderate">
+        Moderate
+      </label>
+      <label>
+        <input type="radio" name="diff" value="Hard">
+        Hard
+      </label>
+    </fieldset>
+  </div>
+
+  <!-- 顶部控制区：Length Category 筛选（Radio） -->
+  <div id="length-controls">
+    <fieldset>
+      <legend>Length Category</legend>
+      <label>
+        <input type="radio" name="length" value="all" checked>
+        All
+      </label>
+      <label>
+        <input type="radio" name="length" value="short">
+        &lt;5km
+      </label>
+      <label>
+        <input type="radio" name="length" value="medium">
+        5-15km
+      </label>
+      <label>
+        <input type="radio" name="length" value="long">
+        &gt;15km
+      </label>
+    </fieldset>
+  </div>
+
+  <!-- Ascent 筛选控件 -->
+  <div id="ascent-controls">
+    <fieldset>
+      <legend>Ascent</legend>
+      <div class="ascent-range-container">
+        <p class="ascent-text">Ascent range: <span id="ascent-label">All</span></p>
+        <input
+          id="ascent-range"
+          type="range"
+          min="0"
+          max="16"
+          step="1"
+          value="0"
+        />
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- 右侧边栏，用于显示 website 信息（嵌入式） -->
+  <div id="sidebar"></div>
+
+  <!-- Classification下拉菜单容器 -->
+<div id="classification-container">
+  <h1 id="map-title">Hiking routes around Glasgow</h1>
+  <div class="dropdown" id="classification-dropdown">
+    <button class="dropbtn">Search Classification</button>
+    <div class="dropdown-content">
+      <label>
+        <input type="radio" name="classi" value="All" checked>
+        All
+      </label>
+      <label>
+        <input type="radio" name="classi" value="Mountain view">
+        Mountain view
+      </label>
+      <label>
+        <input type="radio" name="classi" value="Forest landscape">
+        Forest landscape
+      </label>
+      <label>
+        <input type="radio" name="classi" value="Meadow View">
+        Meadow View
+      </label>
+      <label>
+        <input type="radio" name="classi" value="Streams and waterfalls">
+        Streams and waterfalls
+      </label>
+      <label>
+        <input type="radio" name="classi" value="Loch view">
+        Loch view
+      </label>
+      <label>
+        <input type="radio" name="classi" value="Historical Sightseeing">
+        Historical Sightseeing
+      </label>
+      <label>
+        <input type="radio" name="classi" value="City walk">
+        City walk
+      </label>
+      <label>
+        <input type="radio" name="classi" value="Snowy Mountain View">
+        Snowy Mountain View
+      </label>
+    </div>
+  </div>
+ </div>
+
+  <!-- Mapbox GL JS 核心JS -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
+  <!-- Mapbox GL Geocoder JS（若需要localGeocoder或默认地名搜索时使用） -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+  
+ <!-- 新增：Time 筛选控件（与 Ascent 类似） -->
+<div id="time-controls">
+  <fieldset>
+    <legend>Time</legend>
+    <div class="time-range-container">
+      <p class="time-text">Time range: <span id="time-label">All</span></p>
+      <!-- 0..6 共7个区间 => 0=All, 1=0-1h, 2=1-2h, 3=2-3h, 4=3-4h, 5=4-5h, 6=5h+ -->
+      <input id="time-range" type="range" min="0" max="6" step="1" value="0" />
+    </div>
+  </fieldset>
+</div>
+  
+<!-- Map Theme (Nature / Light / Dark) -->
+<div id="theme-controls">
+  <fieldset>
+    <legend>Map Theme</legend>
+    <!-- Nature 放最左, checked 表示默认选中 -->
+    <label><input type="radio" name="theme" value="nature" checked>Nature</label>
+    <label><input type="radio" name="theme" value="light">Light</label>
+    <label><input type="radio" name="theme" value="dark">Dark</label>
+  </fieldset>
+</div>
+
+<button id="help-button">?</button>
+  
+<!-- 帮助弹窗：卡通对话框 -->
+<div id="help-popup">
+  <p id="help-text">
+    This web map is used to find some of the walking routes around Glasgow.<br>
+    1. Hover or click on the icons for more information.<br>
+    2. Click on the icons to jump to the webpage information.<br>
+    3. Use the webpage's button and search bar to filter.<br>
+    4. For updates, please contact <em>linggalyu@gmail.com</em>. Thanks!
+  </p>
+  <button id="help-close" class="cartoon-button">Close</button>
+  
+</body>
+</html>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
